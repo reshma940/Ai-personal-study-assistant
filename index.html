@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Personal Study Assistant</title>
+
+    <title>AI Personal Study Assistant - Alex</title>
 
     <style>
         * {
@@ -21,16 +22,16 @@
         header {
             background: #4f46e5;
             color: white;
-            padding: 25px;
+            padding: 30px;
             text-align: center;
         }
 
         header h1 {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 30px auto;
             padding: 20px;
         }
@@ -43,9 +44,14 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
 
+        .welcome h2 {
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+
         .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 20px;
         }
 
@@ -61,12 +67,24 @@
             margin-bottom: 12px;
         }
 
-        input, textarea {
+        .card p {
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        input,
+        textarea {
             width: 100%;
             padding: 12px;
             margin-top: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
         }
 
         button {
@@ -77,15 +95,485 @@
             background: #4f46e5;
             color: white;
             cursor: pointer;
+            font-size: 15px;
         }
 
         button:hover {
             background: #3730a3;
         }
 
-        #result {
+        #result,
+        #planResult,
+        #tipResult {
             margin-top: 15px;
             padding: 12px;
             background: #eef2ff;
             border-radius: 8px;
+            line-height: 1.6;
         }
+
+        /* CHATBOT */
+
+        .chatbot {
+            margin-top: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #4f46e5;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h2 {
+            margin-bottom: 5px;
+        }
+
+        .chat-box {
+            height: 350px;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .alex {
+            background: #e0e7ff;
+            margin-right: auto;
+        }
+
+        .user {
+            background: #4f46e5;
+            color: white;
+            margin-left: auto;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+
+        .chat-input input {
+            margin: 0;
+            flex: 1;
+        }
+
+        .chat-input button {
+            margin: 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            background: #1f2937;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🤖 AI Personal Study Assistant</h1>
+    <p>Meet Alex – Your Smart Study Companion</p>
+</header>
+
+<div class="container">
+
+    <div class="welcome">
+        <h2>Welcome to Your Study Assistant!</h2>
+        <p>
+            Organize your studies, create notes, plan your learning,
+            and chat with Alex for study assistance.
+        </p>
+    </div>
+
+    <div class="cards">
+
+        <!-- STUDY NOTES -->
+
+        <div class="card">
+            <h2>📝 Study Notes</h2>
+
+            <p>Enter a topic to get quick study notes.</p>
+
+            <input
+                type="text"
+                id="topic"
+                placeholder="Enter your topic"
+            >
+
+            <button onclick="generateNotes()">
+                Generate Notes
+            </button>
+
+            <div id="result">
+                Your notes will appear here.
+            </div>
+        </div>
+
+
+        <!-- STUDY PLANNER -->
+
+        <div class="card">
+            <h2>📚 Study Planner</h2>
+
+            <p>Create a simple plan for your subject.</p>
+
+            <input
+                type="text"
+                id="subject"
+                placeholder="Enter subject"
+            >
+
+            <button onclick="createPlan()">
+                Create Plan
+            </button>
+
+            <div id="planResult"></div>
+        </div>
+
+
+        <!-- STUDY TIPS -->
+
+        <div class="card">
+            <h2>💡 Study Tips</h2>
+
+            <p>Get useful tips to improve your learning.</p>
+
+            <button onclick="showTip()">
+                Get Study Tip
+            </button>
+
+            <div id="tipResult"></div>
+        </div>
+
+
+        <!-- FOCUS TIMER -->
+
+        <div class="card">
+            <h2>⏱️ Focus Timer</h2>
+
+            <p>Use the timer to stay focused.</p>
+
+            <h2 id="timer">25:00</h2>
+
+            <button onclick="startTimer()">
+                Start Timer
+            </button>
+
+            <button onclick="resetTimer()">
+                Reset
+            </button>
+        </div>
+
+    </div>
+
+
+    <!-- ALEX CHATBOT -->
+
+    <div class="chatbot">
+
+        <div class="chat-header">
+            <h2>🤖 Alex</h2>
+            <p>Your AI Study Assistant</p>
+        </div>
+
+        <div class="chat-box" id="chatBox">
+
+            <div class="message alex">
+                <strong>Alex:</strong><br>
+                Hi! I'm Alex 👋 Your AI Study Assistant.
+                Ask me about studying, exams, programming,
+                or any learning topic!
+            </div>
+
+        </div>
+
+        <div class="chat-input">
+
+            <input
+                type="text"
+                id="userMessage"
+                placeholder="Ask Alex something..."
+                onkeypress="handleEnter(event)"
+            >
+
+            <button onclick="sendMessage()">
+                Send
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<footer>
+    <p>AI Personal Study Assistant © 2026 | Powered by Alex 🤖</p>
+</footer>
+
+
+<script>
+
+    /* STUDY NOTES */
+
+    function generateNotes() {
+
+        let topic = document.getElementById("topic").value;
+
+        if (topic === "") {
+            document.getElementById("result").innerHTML =
+                "Please enter a topic first.";
+            return;
+        }
+
+        document.getElementById("result").innerHTML =
+            "<strong>Study Notes for " + topic + ":</strong><br>" +
+            "• Understand the basic concepts<br>" +
+            "• Learn important definitions<br>" +
+            "• Study important examples<br>" +
+            "• Practice questions<br>" +
+            "• Revise the topic regularly";
+    }
+
+
+    /* STUDY PLAN */
+
+    function createPlan() {
+
+        let subject = document.getElementById("subject").value;
+
+        if (subject === "") {
+            document.getElementById("planResult").innerHTML =
+                "Please enter a subject.";
+            return;
+        }
+
+        document.getElementById("planResult").innerHTML =
+            "<strong>Study Plan:</strong><br>" +
+            "1. Learn " + subject + " concepts<br>" +
+            "2. Make short notes<br>" +
+            "3. Practice questions<br>" +
+            "4. Revise important topics<br>" +
+            "5. Take a self-test";
+    }
+
+
+    /* STUDY TIPS */
+
+    function showTip() {
+
+        let tips = [
+            "Study for 25 minutes and take a short break.",
+            "Make short notes while studying.",
+            "Practice questions after learning a topic.",
+            "Revise difficult topics regularly.",
+            "Keep your phone away while studying."
+        ];
+
+        let randomTip =
+            tips[Math.floor(Math.random() * tips.length)];
+
+        document.getElementById("tipResult").innerHTML =
+            "<strong>💡 Tip:</strong> " + randomTip;
+    }
+
+
+    /* TIMER */
+
+    let time = 25 * 60;
+    let timerInterval;
+
+    function startTimer() {
+
+        clearInterval(timerInterval);
+
+        timerInterval = setInterval(function() {
+
+            let minutes = Math.floor(time / 60);
+            let seconds = time % 60;
+
+            seconds =
+                seconds < 10 ? "0" + seconds : seconds;
+
+            document.getElementById("timer").innerHTML =
+                minutes + ":" + seconds;
+
+            if (time <= 0) {
+
+                clearInterval(timerInterval);
+
+                alert("Study session completed! 🎉");
+
+                time = 25 * 60;
+
+            } else {
+
+                time--;
+
+            }
+
+        }, 1000);
+    }
+
+
+    function resetTimer() {
+
+        clearInterval(timerInterval);
+
+        time = 25 * 60;
+
+        document.getElementById("timer").innerHTML =
+            "25:00";
+    }
+
+
+    /* ALEX CHATBOT */
+
+    function sendMessage() {
+
+        let input =
+            document.getElementById("userMessage");
+
+        let message =
+            input.value.trim();
+
+        if (message === "") {
+            return;
+        }
+
+        addMessage(message, "user");
+
+        input.value = "";
+
+        setTimeout(function() {
+
+            let response = getAlexResponse(message);
+
+            addMessage(response, "alex");
+
+        }, 500);
+    }
+
+
+    function addMessage(message, type) {
+
+        let chatBox =
+            document.getElementById("chatBox");
+
+        let div =
+            document.createElement("div");
+
+        div.className =
+            "message " + type;
+
+        if (type === "alex") {
+
+            div.innerHTML =
+                "<strong>Alex:</strong><br>" + message;
+
+        } else {
+
+            div.innerHTML =
+                "<strong>You:</strong><br>" + message;
+
+        }
+
+        chatBox.appendChild(div);
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+    }
+
+
+    function getAlexResponse(message) {
+
+        let text =
+            message.toLowerCase();
+
+        if (
+            text.includes("hello") ||
+            text.includes("hi") ||
+            text.includes("hey")
+        ) {
+            return "Hello! 👋 I'm Alex. How can I help you study today?";
+        }
+
+        if (
+            text.includes("study") ||
+            text.includes("studying")
+        ) {
+            return "Try studying for 25 minutes, take a short break, and then continue. Make short notes and practice questions as you learn.";
+        }
+
+        if (
+            text.includes("exam") ||
+            text.includes("exams")
+        ) {
+            return "For exams, start with important topics, revise your notes, practice previous questions, and leave time for final revision.";
+        }
+
+        if (
+            text.includes("python")
+        ) {
+            return "Python is a beginner-friendly programming language. Start with variables, data types, conditions, loops, functions, and lists.";
+        }
+
+        if (
+            text.includes("java")
+        ) {
+            return "Java is an object-oriented programming language. Begin with variables, classes, objects, methods, inheritance, and exception handling.";
+        }
+
+        if (
+            text.includes("html")
+        ) {
+            return "HTML is used to structure webpages. Learn headings, paragraphs, links, images, forms, tables, and semantic elements.";
+        }
+
+        if (
+            text.includes("motivate") ||
+            text.includes("motivation")
+        ) {
+            return "You don't have to finish everything at once. Focus on one small topic, complete it, and then move to the next one. 💪";
+        }
+
+        if (
+            text.includes("thank")
+        ) {
+            return "You're welcome! 😊 I'm always ready to help you study.";
+        }
+
+        return "I'm Alex 🤖. I can help with study planning, exam preparation, programming basics, HTML, Python, Java, and general study tips.";
+    }
+
+
+    function handleEnter(event) {
+
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+
+    }
+
+</script>
+
+</body>
+</html>
